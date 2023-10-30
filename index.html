@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2023 Boys Golf Tournament</title>
+    <style>
+        body {
+            background-color: #808080;
+            background-image: url('https://i.imgur.com/RLlFnML.png');
+            background-size: contain;
+            background-position: bottom right;
+            background-repeat: no-repeat;
+            font-weight: bold;
+            color: black;
+            font-size: 16px;
+            padding: 20px;
+            margin: 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 60%;
+            margin: 20px;
+            color: black;
+            font-size: 16px;
+        }
+
+        th, td {
+            border: 2px solid black;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        #podium {
+            margin-top: 20px;
+            color: black;
+            font-size: 16px;
+        }
+
+        h1, h2 {
+            color: black;
+            font-size: 22px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>2023 Boys Golf Tournament</h1>
+
+    <table id="scoreTable">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Round 1</th>
+                <th>Round 2</th>
+                <th>Round 3</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Joe</td>
+                <td contenteditable="true" class="scoreInput" data-player="joe" data-round="1"></td>
+                <td contenteditable="true" class="scoreInput" data-player="joe" data-round="2"></td>
+                <td contenteditable="true" class="scoreInput" data-player="joe" data-round="3"></td>
+                <td id="joeTotal"></td>
+            </tr>
+            <tr>
+                <td>Blake</td>
+                <td contenteditable="true" class="scoreInput" data-player="blake" data-round="1"></td>
+                <td contenteditable="true" class="scoreInput" data-player="blake" data-round="2"></td>
+                <td contenteditable="true" class="scoreInput" data-player="blake" data-round="3"></td>
+                <td id="blakeTotal"></td>
+            </tr>
+            <tr>
+                <td>Wes</td>
+                <td contenteditable="true" class="scoreInput" data-player="wes" data-round="1"></td>
+                <td contenteditable="true" class="scoreInput" data-player="wes" data-round="2"></td>
+                <td contenteditable="true" class="scoreInput" data-player="wes" data-round="3"></td>
+                <td id="wesTotal"></td>
+            </tr>
+            <tr>
+                <td>Luc</td>
+                <td contenteditable="true" class="scoreInput" data-player="luc" data-round="1"></td>
+                <td contenteditable="true" class="scoreInput" data-player="luc" data-round="2"></td>
+                <td contenteditable="true" class="scoreInput" data-player="luc" data-round="3"></td>
+                <td id="lucTotal"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div id="podium">
+        <h2>Podium</h2>
+        <p>1st: <span id="firstPlace"></span></p>
+        <p>2nd: <span id="secondPlace"></span></p>
+        <p>3rd: <span id="thirdPlace"></span></p>
+        <p>4th: <span id="fourthPlace"></span></p>
+    </div>
+
+    <script>
+        function updateScores() {
+            let scores = {
+                joe: [],
+                blake: [],
+                wes: [],
+                luc: []
+            };
+
+            for (let player of Object.keys(scores)) {
+                for (let round = 1; round <= 3; round++) {
+                    let scoreInput = document.querySelector(`.scoreInput[data-player="${player}"][data-round="${round}"]`);
+                    let score = parseInt(scoreInput.innerText || 0);
+                    scores[player].push(score);
+                }
+
+                let totalScore = scores[player].reduce((acc, val) => acc + val, 0);
+                document.getElementById(`${player}Total`).innerText = totalScore;
+            }
+
+            let podium = calculatePodium(scores);
+
+            document.getElementById('firstPlace').innerText = podium[0];
+            document.getElementById('secondPlace').innerText = podium[1];
+            document.getElementById('thirdPlace').innerText = podium[2];
+            document.getElementById('fourthPlace').innerText = podium[3];
+
+            // Save scores to localStorage
+            localStorage.setItem('golfScores', JSON.stringify(scores));
+        }
+
+        function calculatePodium(scores) {
+            let sortedScores = Object.keys(scores).sort((a, b) => {
+                let totalA = scores[a].reduce((acc, val) => acc + val, 0);
+                let totalB = scores[b].reduce((acc, val) => acc + val, 0);
+                return totalA - totalB;
+            });
+
+            return sortedScores.slice(0, 4);
+        }
+
+        document.getElementById('scoreTable').addEventListener('input', updateScores);
+
+        // Load scores from localStorage on page load
+        window.addEventListener('load', function () {
+            let savedScores = localStorage.getItem('golfScores');
+            if (savedScores) {
+                savedScores = JSON.parse(savedScores);
+                for (let player of Object.keys(savedScores)) {
+                    for (let round = 1; round <= 3; round++) {
+                        let scoreInput = document.querySelector(`.scoreInput[data-player="${player}"][data-round="${round}"]`);
+                        scoreInput.innerText = savedScores[player][round - 1];
+                    }
+                }
+                updateScores(); // Update scores after loading from localStorage
+            }
+        });
+
+        updateScores();
+    </script>
+
+</body>
+
+</html>
